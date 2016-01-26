@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Clue</title>
+    <style>
+        *{
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            margin:0;
+            padding:0;
+        }
+        body,html{
+            margin:0;
+            padding:0;
+            width:100%;
+            height:100%;
+            overflow: hidden;
+        }
+        #mod_wrap{
+            margin:0;
+            padding:0;
+            width:100%;
+        }
+
+        .card_tag{
+            border:1px solid black;
+        }
+    </style>
+</head>
+<body style="background-color: dimgrey">
+<div id="login" style="width:100%; height: 100%;">
+    <input id="login_name" type="text"/>
+    <button id="button_login" onclick="function_login()">Submit</button>
+    <button id="start_game" onclick="function_start()">Start Game</button>
+    <div id="all_players"></div>
+</div>
+<div id="message">clue</div><div id="turner">Its sosos turn</div><button id="restart" onclick="restart_game_client()"> restart server</button>
+<div id="mod_wrap">
+
+</div>
+
+
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+login = document.getElementById('login');
+login_name = document.getElementById('login_name');
+button_login = document.getElementById('button_login');
+all_players = document.getElementById('all_players');
+start_game = document.getElementById('start_game');
+turner = document.getElementById('turner');
+restart = document.getElementById('restart');
+mycards=[];
+
+wta=0;
+    function resizer() {
+
+        suspects = "MISS SCARLET,PROFESSOR PLUM,MRS. PEACOCK,REVEREND GREEN,COLONEL MUSTARD,MRS. WHITE";
+        weapons = "CANDLE STICK,DAGGER,LEAD PIPE,REVOLVER,ROPE,WRENCH";
+        rooms = "KITCHEN,BALL ROOM,DINING ROOM,LIBRARY,LOUNGE,HALL";
+        colors = ['red',"purple",'pink','green','yellow','white'];
+        cc = 0;
+        order_type = ['suspects', 'weapons', 'rooms'];
+        all_cards = suspects + "," + weapons + "," + rooms;
+        all_cards = all_cards.split(",");
+        mod_wrap = document.getElementById('mod_wrap');
+        message = document.getElementById('message');
+        card_html = "<div class='card_contain'>" +
+                "<div class='card_tag'></div>" +
+                "<div class='card_name'></div>" +
+                "</div>";
+
+        mod_wrap.innerHTML = '';
+        for (var i = 0; i < 23; i++) {
+            mod_wrap.innerHTML += card_html;
+        }
+        w_width = window.innerWidth;
+        w_height = window.innerHeight;
+        if (w_width - w_height < 0) {
+            var orientation = "phone";
+            card_width = w_width / 3;
+            card_height = w_height / 9;
+            font_size = w_width / 30;
+        } else {
+            var orientation = "desktop";
+            card_width = w_width / 6;
+            card_height = w_height / 5;
+            font_size = w_width / 37;
+        }
+
+        login_name.style.fontSize = font_size*2 +'px';
+        button_login.style.fontSize = font_size*2 + "px";
+        card_containers = document.getElementsByClassName("card_contain");
+        for (var i = 0; i < card_containers.length; i++) {
+            var c = card_containers;
+            c[i].style.fontSize = font_size + "px";
+            c[i].style.boxSizing = "border-box";
+            c[i].style.border = "1px solid black";
+            c[i].style.width = card_width + "px";
+            c[i].style.height = card_height + 'px';
+            c[i].style.display = 'inline-block';
+            c[i].style.margin = '0';
+            c[i].style.textAlign = 'center';
+            c[i].style.borderRadius = "20%";
+            c[i].style.position = 'absolute';
+            if (cc>5){cc = 0}
+            c[i].style.backgroundColor= colors[cc];
+            cc +=1;
+
+            c[i].style.left = card_width * i + "px";
+            if (i<18) {
+                c[i].addEventListener('click', function () {
+                    if (this.children[0].innerHTML== "suspect"){
+
+                       suspect.children[1].innerHTML = this.children[1].innerHTML;
+                    }
+                    if (this.children[0].innerHTML== "weapon"){
+                        weapon.children[1].innerHTML = this.children[1].innerHTML;
+                    }
+                    if (this.children[0].innerHTML== "room"){
+                        room.children[1].innerHTML = this.children[1].innerHTML;
+                    }
+                });
+            }
+            if (i>17){
+                c[i].classList.add('special');
+            }
+            if (i * card_width >= w_width) {
+                c[i].style.left = (card_width * i) - (w_width * 1) + "px";
+                c[i].style.top = card_height + "px";
+            }
+            if (i * card_width >= w_width * 2) {
+                c[i].style.left = (card_width * i) - (w_width * 2) + "px";
+                c[i].style.top = card_height * 2 + "px";
+            }
+            if (i * card_width >= w_width * 3) {
+                c[i].style.left = (card_width * i) - (w_width * 3) + "px";
+                c[i].style.top = card_height * 3 + "px";
+            }
+            if (i * card_width >= w_width * 4) {
+                c[i].style.left = (card_width * i) - (w_width * 4) + "px";
+                c[i].style.top = card_height * 4 + "px";
+            }
+            if (i * card_width >= w_width * 5) {
+                c[i].style.left = (card_width * i) - (w_width * 5) + "px";
+                c[i].style.top = card_height * 5 + "px";
+            }
+            if (i * card_width >= w_width * 6) {
+                c[i].style.left = (card_width * i) - (w_width * 6) + "px";
+                c[i].style.top = card_height * 6 + "px";
+            }
+            if (i * card_width >= w_width * 7) {
+                c[i].style.left = (card_width * i) - (w_width * 7) + "px";
+                c[i].style.top = card_height * 7 + "px";
+            }
+
+        }
+
+        card_tags = document.getElementsByClassName("card_tag");
+        for (var i = 0; i < card_tags.length; i++) {
+            var ct = card_tags;
+            ct[i].style.borderRadius = '20%';
+            ct[i].style.backgroundColor = 'white';
+
+            if (i < 6) {
+                ct[i].innerHTML = "suspect"
+            }
+            if (i > 5 && i < 12) {
+                ct[i].innerHTML = "weapon"
+            }
+            if (i > 11) {
+                ct[i].innerHTML = "room"
+            }
+            if (i== 18){
+                ct[i].innerHTML = "suspect";
+                suspect = ct[i].parentNode;
+            }
+            if (i== 19){
+                ct[i].innerHTML = "weapon";
+                weapon = ct[i].parentNode;
+            }
+            if (i== 20){
+                ct[i].innerHTML = "room";
+                room = ct[i].parentNode;
+            }
+            if (i== 21){
+                ct[i].innerHTML = "witness";
+                witness = ct[i].parentNode;
+                ct[i].parentNode.addEventListener('click',function(){
+                    wta+=1;
+                    if (wta==players_array.length){
+                        wta=0;
+                    }
+                    this.children[1].innerHTML=players_array[wta];
+                    if (players_array[wta]== message.innerHTML){
+                        wta+=1;
+                    }
+                    if (wta==players_array.length){
+                        wta=0;
+                    }
+
+                    this.children[1].innerHTML=players_array[wta];
+
+                })
+
+            }
+            if (i== 22){
+                ct[i].innerHTML = "submit";
+                submit = ct[i].parentNode;
+                submit.addEventListener('click',function(){
+                    if (witness.children[1].innerHTML == 'special'||suspect.children[1].innerHTML == 'special'||weapon.children[1].innerHTML == 'special'||room.children[1].innerHTML == 'special'){
+                        alert('fill out all spaces');
+                        return;
+                    }
+                    if (message.innerHTML==turner.innerHTML) {
+                        socket.emit('guess', [witness.children[1].innerHTML, suspect.children[1].innerHTML, weapon.children[1].innerHTML, room.children[1].innerHTML]);
+                    }
+                })
+            }
+        }
+        card_names = document.getElementsByClassName("card_name");
+        for (var i = 0; i < card_names.length; i++) {
+            var cn = card_names;
+            cn[i].innerHTML = all_cards[i];
+            if (mycards.indexOf(all_cards[i])>-1){
+                cn[i].parentNode.style.backgroundColor= 'grey';
+            }
+            if (all_cards[i]== undefined){
+                cn[i].innerHTML = "special";
+            }
+        }
+        message.style.fontSize = font_size  +"px";
+        message_height = message.offsetHeight;
+        mod_wrap.style.position = 'absolute';
+        mod_wrap.top = message_height +"px";
+        message.style.width = card_width*2+"px";
+        message.style.display = 'inline-block';
+        turner.style.display ='inline-block';
+        turner.style.width = card_width*2 +'px';
+        restart.style.display ='inline-block';
+        restart.style.width = card_width*1 +'px';
+        turner.style.fontSize = font_size +"px";
+        message.style.textAlign = 'center';
+
+        submit.style.left = parseInt(submit.style.left)+card_width+"px";
+    }
+    resizer();
+    window.addEventListener('resize',resizer);
+    socket = io.connect();
+    login.style.fontSize = font_size*3+"px";
+    start_game.style.fontSize = font_size*2+"px";
+    function function_login(){
+        socket.emit('login',login_name.value);
+        message.innerHTML = login_name.value;
+    }
+    function function_start(){
+        socket.emit('start');
+    }
+    socket.on('success',function(data){
+        all_players.innerHTML ='';
+        players_array= data;
+        for (var i=0;i<data.length;i++){
+            all_players.innerHTML += data[i]+", ";
+        }
+    });
+    socket.on('come_get_it',function(){
+        socket.emit('my_cards',message.innerHTML);
+    });
+    socket.on('here_cards',function(data){
+        mycards= data;
+        for (var i=0;i<mycards.length;i++){
+            mycards[i]=mycards[i].toString();
+        }
+
+        login.style.display = 'none';
+        resizer();
+    });
+    socket.on('turn_keeper',function(data){
+
+        turner.innerHTML = data;
+        if (message.innerHTML == data){
+            alert('your turn')
+        }
+    });
+    socket.on('receive_card',function(data){
+        console.log(data);
+       mycards.push(data);
+        resizer();
+    });
+    socket.on('you_win',function(data){
+        alert(data);
+    });
+    function restart_game_client(){
+        socket.emit('restart',"");
+    }
+    socket.on('win',function(data){
+        alert(turner.innerHTML + ' wins');
+    })
+</script>
+</body>
+</html>
